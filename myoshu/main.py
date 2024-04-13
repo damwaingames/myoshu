@@ -48,7 +48,7 @@ def new(
     Create a new game.
     """
     new_game = Game(boardsize, p1_name, p2_name, handicap)
-    print(new_game.board._size)
+    print(new_game.board._groups, new_game._komi)
 
 
 @app.command()

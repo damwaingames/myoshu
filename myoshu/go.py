@@ -23,12 +23,6 @@ HANDICAP_PLACEMENT: dict[Boardsize, list[int]] = {
 }
 
 
-class Stone:
-    def __init__(self, pos: int, colour: Colour) -> None:
-        self._pos = pos
-        self._colour = colour
-
-
 class Goban:
     def __init__(self, size: Boardsize, handicap: int = 0) -> None:
         self._size = size
@@ -56,13 +50,45 @@ class Goban:
                 assert False, "unreachable"
         for i in points:
             self._groups.append(
-                Group(Stone(HANDICAP_PLACEMENT[self._size][i], Colour.BLACK))
+                Group(HANDICAP_PLACEMENT[self._size][i], Colour.BLACK, self)
             )
 
 
+class Stone:
+    def __init__(self, pos: int, colour: Colour, group: "Group") -> None:
+        self._pos = pos
+        self._colour = colour
+        self._group = group
+
+    def __str__(self) -> str:
+        return self.convert_pos_to_sgf() + ", " + str(self._colour)
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    def convert_pos_to_coord(self) -> str:
+        file = self._pos % self._group._board._size
+        file = self._group._board._size if file == 0 else file
+        rank = self._pos // self._group._board._size
+        rank = rank if file == self._group._board._size else rank + 1
+        return f"{file}-{rank}"
+
+    def convert_pos_to_sgf(self) -> str:
+        coord = self.convert_pos_to_coord()
+        file, rank = coord.split("-")
+        return chr(int(file) + 96) + chr(int(rank) + 96)
+
+
 class Group:
-    def __init__(self, stone: Stone) -> None:
-        self._stones = [stone]
+    def __init__(self, pos: int, colour: Colour, board: Goban) -> None:
+        self._stones = [Stone(pos, colour, self)]
+        self._board = board
+
+    def __str__(self) -> str:
+        return str(self._stones)
+
+    def __repr__(self) -> str:
+        return str(self)
 
 
 class Game:
