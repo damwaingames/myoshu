@@ -1,9 +1,13 @@
 import random
 import textwrap
 
+from typing_extensions import Annotated
+
 import typer
 
 from rich import print
+
+from .go import Game
 
 app = typer.Typer()
 
@@ -13,6 +17,28 @@ def callback() -> None:
     """
     Myoshu (妙手) a CLI for playing Go.
     """
+
+
+@app.command()
+def new(
+    boardsize: Annotated[
+        int, typer.Option(help="Size of board to create game on.")
+    ] = 19,
+    p1_name: Annotated[
+        str, typer.Option(help="Name of black player.")
+    ] = "Black player",
+    p2_name: Annotated[
+        str, typer.Option(help="Name of white player.")
+    ] = "White player",
+    handicap: Annotated[
+        int, typer.Option(help="Number of handicap stones to be placed.")
+    ] = 0,
+) -> None:
+    """
+    Create a new game.
+    """
+    new_game = Game(boardsize, p1_name, p2_name, handicap)
+    print(new_game.board._size)
 
 
 @app.command()
