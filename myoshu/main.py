@@ -1,15 +1,22 @@
 import random
 import textwrap
 
-from typing_extensions import Annotated
-
 import typer
 
 from rich import print
+from typing_extensions import Annotated
 
 from .go import Game
 
 app = typer.Typer()
+
+
+def boardsize_callback(size: int) -> int:
+    match size:
+        case 9 | 13 | 19:
+            return size
+        case _:
+            raise typer.BadParameter("Valid sizes are 9, 13 or 19.")
 
 
 @app.callback()
@@ -22,7 +29,10 @@ def callback() -> None:
 @app.command()
 def new(
     boardsize: Annotated[
-        int, typer.Option(help="Size of board to create game on.")
+        int,
+        typer.Option(
+            help="Size of board to create game on.", callback=boardsize_callback
+        ),
     ] = 19,
     p1_name: Annotated[
         str, typer.Option(help="Name of black player.")
