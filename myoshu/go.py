@@ -193,6 +193,7 @@ class Game:
         self.p1_name = p1_name
         self.p2_name = p2_name
         self.current_move = 1
+        self.moves: list[tuple[Colour, int]] = []
         self._board = Goban(Boardsize(size), handicap)
         self._next_player = Colour.WHITE if handicap > 1 else Colour.BLACK
         self._komi = 7.5 if handicap == 0 else 0.5
@@ -242,6 +243,7 @@ class Game:
                     new_group._stones.add(stone)
                 self.board._groups.remove(group)
             self.board._groups.append(new_group)
+            self.moves.append((self.current_player, pos))
             self.advance_turn()
         else:
             new_group = Group(pos, self._next_player, self.board)
@@ -250,4 +252,5 @@ class Game:
                     f"Placing a stone at {new_group._stones.pop().convert_pos_to_coord} would be a suicide move."
                 )
             self.board._groups.append(new_group)
+            self.moves.append((self.current_player, pos))
             self.advance_turn()
