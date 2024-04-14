@@ -72,17 +72,17 @@ class Stone:
     def __repr__(self) -> str:
         return str(self)
 
-    def neighbours(self) -> list[int]:
-        adjacent = []
+    def neighbours(self) -> set[int]:
+        adjacent = set()
         size = self._group._board._size
         if self._pos - size > 0:  # Up
-            adjacent.append(self._pos - size)
+            adjacent.add(self._pos - size)
         if self._pos + size <= size**2:  # Down
-            adjacent.append(self._pos + size)
+            adjacent.add(self._pos + size)
         if self._pos % size != 1:  # Left
-            adjacent.append(self._pos - 1)
+            adjacent.add(self._pos - 1)
         if self._pos % size != 0:  # Right
-            adjacent.append(self._pos + 1)
+            adjacent.add(self._pos + 1)
         return adjacent
 
     def convert_pos_to_coord(self) -> str:
