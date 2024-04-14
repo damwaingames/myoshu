@@ -61,10 +61,29 @@ class Stone:
         self._group = group
 
     def __str__(self) -> str:
-        return self.convert_pos_to_sgf() + ", " + str(self._colour)
+        return (
+            self.convert_pos_to_sgf()
+            + ", "
+            + str(self._colour)
+            + " : "
+            + str(self.neighbours())
+        )
 
     def __repr__(self) -> str:
         return str(self)
+
+    def neighbours(self) -> list[int]:
+        adjacent = []
+        size = self._group._board._size
+        if self._pos - size > 0:  # Up
+            adjacent.append(self._pos - size)
+        if self._pos + size <= size**2:  # Down
+            adjacent.append(self._pos + size)
+        if self._pos % size != 1:  # Left
+            adjacent.append(self._pos - 1)
+        if self._pos % size != 0:  # Right
+            adjacent.append(self._pos + 1)
+        return adjacent
 
     def convert_pos_to_coord(self) -> str:
         file = self._pos % self._group._board._size
