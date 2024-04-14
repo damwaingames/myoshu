@@ -6,6 +6,7 @@ import typer
 from rich import print
 from typing_extensions import Annotated
 
+from .db import GameDatabase
 from .go import Game
 
 app = typer.Typer()
@@ -48,7 +49,41 @@ def new(
     Create a new game.
     """
     new_game = Game(boardsize, p1_name, p2_name, handicap)
+    db = GameDatabase()
+    id = db.new_game(new_game)
     print(new_game.board._groups, new_game._komi)
+    print(f"Created new game with id {id}")
+    db.connection.close()
+
+
+@app.command()
+def list(
+    all: Annotated[
+        bool,
+        typer.Option("--all", help="Include games that have been completed."),
+    ] = False,
+) -> None:
+    """
+    List all games.
+    """
+    db = GameDatabase()
+    if all:
+        results = db.get_all_games()
+    else:
+        results = db.get_games()
+    print(results)
+    db.connection.close()
+
+
+@app.command()
+def delete(id: int) -> None:
+    """
+    Delete the game with a given id. !WARNING! - This cannot be undone.
+    """
+    db = GameDatabase()
+    db.delete_game(id)
+    db.connection.close()
+    print(f"Successfully deleted game with id {id}")
 
 
 @app.command()
