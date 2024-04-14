@@ -122,7 +122,7 @@ class TestGame:
         assert default_full_game.current_move == 2
         assert default_full_game.current_player == go.Colour.WHITE
         assert len(default_full_game.moves) == 1
-        assert default_full_game.moves[1] == (go.Colour.BLACK, 181)
+        assert default_full_game.moves[0] == (go.Colour.BLACK, 181)
 
     def test_cannot_place_stone_on_existing_stone(self, default_full_game) -> None:
         default_full_game.make_move(181)
