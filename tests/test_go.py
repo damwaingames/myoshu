@@ -13,10 +13,7 @@ class TestGame:
         assert default_full_game.board._handicap == 0
         assert default_full_game._next_player == go.Colour.BLACK
         assert default_full_game._komi == 7.5
-
-    def test_cannot_replace_game_board(self, default_full_game) -> None:
-        with pytest.raises(go.GameError):
-            default_full_game.board = go.Goban(go.Boardsize(9), 4)
+        assert default_full_game.current_move == 1
 
     def test_handicap_full_game_setup(self, handicap_full_game) -> None:
         current_handicap = handicap_full_game._board._handicap
@@ -41,28 +38,28 @@ class TestGame:
     def test_convert_stone_pos_to_coordinates(self, default_full_game) -> None:
         one_one = go.Group(
             1, default_full_game._next_player, default_full_game._board
-        )._stones[0]
+        )._stones.pop()
         two_one = go.Group(
             2, default_full_game._next_player, default_full_game._board
-        )._stones[0]
+        )._stones.pop()
         nineteen_one = go.Group(
             19, default_full_game._next_player, default_full_game._board
-        )._stones[0]
+        )._stones.pop()
         one_two = go.Group(
             20, default_full_game._next_player, default_full_game._board
-        )._stones[0]
+        )._stones.pop()
         nineteen_two = go.Group(
             38, default_full_game._next_player, default_full_game._board
-        )._stones[0]
+        )._stones.pop()
         tengen = go.Group(
             181, default_full_game._next_player, default_full_game._board
-        )._stones[0]
+        )._stones.pop()
         one_nineteen = go.Group(
             343, default_full_game._next_player, default_full_game._board
-        )._stones[0]
+        )._stones.pop()
         nineteen_nineteen = go.Group(
             361, default_full_game._next_player, default_full_game._board
-        )._stones[0]
+        )._stones.pop()
         assert one_one.convert_pos_to_coord() == "1-1"
         assert one_one.convert_pos_to_sgf() == "aa"
         assert two_one.convert_pos_to_coord() == "2-1"
@@ -83,28 +80,28 @@ class TestGame:
     def test_stones_have_correct_neighbours(self, default_full_game) -> None:
         one_one = go.Group(
             1, default_full_game._next_player, default_full_game._board
-        )._stones[0]
+        )._stones.pop()
         two_one = go.Group(
             2, default_full_game._next_player, default_full_game._board
-        )._stones[0]
+        )._stones.pop()
         nineteen_one = go.Group(
             19, default_full_game._next_player, default_full_game._board
-        )._stones[0]
+        )._stones.pop()
         one_two = go.Group(
             20, default_full_game._next_player, default_full_game._board
-        )._stones[0]
+        )._stones.pop()
         nineteen_two = go.Group(
             38, default_full_game._next_player, default_full_game._board
-        )._stones[0]
+        )._stones.pop()
         tengen = go.Group(
             181, default_full_game._next_player, default_full_game._board
-        )._stones[0]
+        )._stones.pop()
         one_nineteen = go.Group(
             343, default_full_game._next_player, default_full_game._board
-        )._stones[0]
+        )._stones.pop()
         nineteen_nineteen = go.Group(
             361, default_full_game._next_player, default_full_game._board
-        )._stones[0]
+        )._stones.pop()
         assert one_one.neighbours() == {2, 20}
         assert two_one.neighbours() == {1, 3, 21}
         assert nineteen_one.neighbours() == {18, 38}
@@ -113,6 +110,83 @@ class TestGame:
         assert tengen.neighbours() == {162, 180, 182, 200}
         assert one_nineteen.neighbours() == {324, 344}
         assert nineteen_nineteen.neighbours() == {342, 360}
+
+    def test_make_move(self, default_full_game) -> None:
+        # Play first move at tengen
+        assert default_full_game.current_player == go.Colour.BLACK
+        default_full_game.make_move(181)
+        assert len(default_full_game.board.black_groups) == 1
+        assert len(default_full_game.board._groups) == 1
+        for group in default_full_game.board.black_groups:
+            assert group.liberties() == {162, 180, 182, 200}
+        assert default_full_game.current_move == 2
+        assert default_full_game.current_player == go.Colour.WHITE
+
+    def test_cannot_place_stone_on_existing_stone(self, default_full_game) -> None:
+        default_full_game.make_move(181)
+        # Check you can't place a stone where one already exists
+        with pytest.raises(go.IllegalPlacement):
+            default_full_game.make_move(181)
+        assert len(default_full_game.board._groups) == 1
+        assert default_full_game.current_move == 2
+        assert default_full_game.current_player == go.Colour.WHITE
+
+    def test_make_move_alternates(self, default_full_game) -> None:
+        default_full_game.make_move(181)
+        default_full_game.make_move(182)
+        assert len(default_full_game.board.black_groups) == 1
+        assert len(default_full_game.board.white_groups) == 1
+        assert len(default_full_game.board._groups) == 2
+        for group in default_full_game.board.black_groups:
+            assert group.liberties() == {162, 180, 200}
+        for group in default_full_game.board.white_groups:
+            assert group.liberties() == {163, 183, 201}
+        assert default_full_game.current_move == 3
+        assert default_full_game.current_player == go.Colour.BLACK
+
+    def test_make_move_adds_stone_to_correct_group(self, default_full_game) -> None:
+        default_full_game.make_move(181)
+        default_full_game.make_move(182)
+        default_full_game.make_move(162)
+        default_full_game.make_move(163)
+        assert len(default_full_game.board.black_groups) == 1
+        assert len(default_full_game.board.white_groups) == 1
+        assert len(default_full_game.board._groups) == 2
+        for group in default_full_game.board.black_groups:
+            assert group.liberties() == {143, 161, 180, 200}
+        for group in default_full_game.board.white_groups:
+            assert group.liberties() == {144, 164, 183, 201}
+
+    def test_make_move_removes_captured_stones(self, default_full_game) -> None:
+        default_full_game.make_move(181)
+        default_full_game.make_move(182)
+        default_full_game.make_move(1)
+        default_full_game.make_move(162)
+        default_full_game.make_move(19)
+        default_full_game.make_move(180)
+        default_full_game.make_move(343)
+        default_full_game.make_move(200)
+        with pytest.raises(go.IllegalPlacement):
+            default_full_game.make_move(181)
+        default_full_game.make_move(61)
+        assert len(default_full_game.board.white_groups) == 4
+        assert len(default_full_game.board.black_groups) == 4
+
+    def test_make_move_merges_adjacent_same_colour_groups(
+        self, default_full_game
+    ) -> None:
+        default_full_game.make_move(181)
+        default_full_game.make_move(182)
+        default_full_game.make_move(1)
+        default_full_game.make_move(162)
+        default_full_game.make_move(19)
+        default_full_game.make_move(180)
+        default_full_game.make_move(343)
+        default_full_game.make_move(200)
+        default_full_game.make_move(61)
+        default_full_game.make_move(181)
+        assert len(default_full_game.board.white_groups) == 1
+        assert len(default_full_game.board.black_groups) == 4
 
 
 @pytest.fixture
