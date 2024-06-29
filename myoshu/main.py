@@ -103,7 +103,7 @@ def proverb() -> None:
 
 
 def _full_border(proverb_length: int) -> str:
-    return "[bold red]#" * (proverb_length + 6) + "[/bold red]"
+    return "[bold red]" + "#" * (proverb_length + 6) + "[/bold red]"
 
 
 def _empty_row_border(proverb_length: int) -> str:
