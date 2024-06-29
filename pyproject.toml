@@ -2,20 +2,20 @@
 name = "myoshu"
 version = "0.1.0"
 description = "A simple CLI for playing Go."
-authors = [ "Æ Griffiths <164574794+damwaingames@users.noreply.github.com>"]
+authors = ["Æ Griffiths <164574794+damwaingames@users.noreply.github.com>"]
 readme = "README.md"
 
 [tool.poetry.scripts]
 myoshu = "myoshu.main:app"
 
 [tool.poetry.dependencies]
-python = "^3.11"
-typer = "^0.12.3"
+python = "^3.12"
+typer = { extras = ["all"], version = "^0.12.3" }
 
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.3.7"
-pytest = "^8.1.1"
+ruff = "^0.5.0"
+pytest = "^8.2.2"
 
 [build-system]
 requires = ["poetry-core"]
